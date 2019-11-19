@@ -102,7 +102,8 @@ public class UserDao {
 
         statement.setInt(1, userId);
 
-        statement.executeUpdate();
+//        statement.executeUpdate();
+//        statement.executeQuery();
       }
 
     } catch (SQLException e) {
