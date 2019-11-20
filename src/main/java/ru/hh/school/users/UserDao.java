@@ -22,6 +22,7 @@ public class UserDao {
     return null;
   }
 
+
   // region already implemented methods
 
   public void saveNew(User user) {
@@ -29,12 +30,11 @@ public class UserDao {
       throw new IllegalArgumentException("User " + user + " already exists");
     }
 
-    try (Connection connection = dataSource.getConnection()) {
-
-      try (PreparedStatement preparedStatement = connection.prepareStatement(
-        "insert into hhuser (first_name, last_name) values (?, ?)",
-        Statement.RETURN_GENERATED_KEYS)) {
-
+    try (Connection connection = dataSource.getConnection();
+         PreparedStatement preparedStatement = connection.prepareStatement(
+             "insert into hhuser (first_name, last_name) values (?, ?)",
+             Statement.RETURN_GENERATED_KEYS)
+    ) {
         preparedStatement.setString(1, user.getFirstName());
         preparedStatement.setString(2, user.getLastName());
         preparedStatement.executeUpdate();
@@ -45,7 +45,6 @@ public class UserDao {
           }
         }
 
-      }
 
     } catch (SQLException e) {
       throw new RuntimeException(e);
@@ -102,6 +101,7 @@ public class UserDao {
 
         statement.setInt(1, userId);
 
+        // TODO: нужное раскомментить
 //        statement.executeUpdate();
 //        statement.executeQuery();
       }
@@ -121,11 +121,8 @@ public class UserDao {
       try (PreparedStatement statement = connection.prepareStatement(
         "UPDATE hhuser SET first_name = ?, last_name = ? WHERE user_id = ?")) {
 
-        statement.setString(1, user.getFirstName());
-        statement.setString(2, user.getLastName());
-        statement.setInt(3, user.getId());
-
-        statement.executeUpdate();
+        //TODO:
+        //реализовать установку параметров и вызов запроса
       }
 
     } catch (SQLException e) {
