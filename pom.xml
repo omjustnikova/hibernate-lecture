@@ -37,6 +37,13 @@
     <dependencies>
 <!--        postgresql 42.2.8-->
 
+        <dependency>
+            <groupId>com.opentable.components</groupId>
+            <artifactId>otj-pg-embedded</artifactId>
+            <version>0.13.0</version>
+            <scope>test</scope>
+        </dependency>
+
         <!--testing-->
         <dependency>
             <groupId>junit</groupId>

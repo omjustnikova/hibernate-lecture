@@ -4,10 +4,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import com.opentable.db.postgres.embedded.EmbeddedPostgres;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.postgresql.ds.PGSimpleDataSource;
+
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
@@ -15,15 +19,6 @@ import java.util.Set;
 public class UserDaoTest {
 
   private static UserDao userDao;
-
-  @BeforeClass
-  public static void setUpDatasource() {
-    PGSimpleDataSource ds = new PGSimpleDataSource();
-    ds.setUser("hh");
-    ds.setPassword("123");
-    ds.setUrl("jdbc:postgresql://localhost:5432/hh");
-    userDao = new UserDao(ds);
-  }
 
   @Before
   public void cleanUpDb() {
@@ -103,5 +98,25 @@ public class UserDaoTest {
       userDao.getBy(user.getId()).map(User::getFirstName).orElse(null)
     );
   }
+
+  @BeforeClass
+  public static void setUpDatasource() {
+    try {
+      EmbeddedPostgres.builder()
+          .setPort(5433)
+          .start();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+    PGSimpleDataSource ds = new PGSimpleDataSource();
+    ds.setUser("postgres");
+    ds.setPassword("postgres");
+    ds.setUrl("jdbc:postgresql://localhost:5433/postgres");
+    userDao = new UserDao(ds);
+
+    TestHelper.executeScript(ds, "create_hhuser.sql");
+  }
+
 
 }
