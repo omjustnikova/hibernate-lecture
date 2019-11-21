@@ -1,5 +1,6 @@
 package ru.hh.school.users;
 
+import com.opentable.db.postgres.embedded.EmbeddedPostgres;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.Metadata;
 import org.hibernate.boot.MetadataSources;
@@ -12,7 +13,10 @@ import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import ru.hh.school.TestHelper;
+
 import javax.persistence.PersistenceException;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
@@ -23,12 +27,26 @@ public class UserServiceTest {
   
   @BeforeClass
   public static void setUp() {
+    EmbeddedPostgres embeddedPostgres = null;
+
+    try {
+      embeddedPostgres = EmbeddedPostgres.builder()
+          .setPort(5433)
+          .start();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
     SessionFactory sessionFactory = createSessionFactory();
     
     userService = new UserService(
       sessionFactory, 
       new UserDao(sessionFactory)
     );
+
+    if (embeddedPostgres != null) {
+      TestHelper.executeScript(embeddedPostgres.getPostgresDatabase(), "create_hhuser.sql");
+    }
   }
 
   private static SessionFactory createSessionFactory() {
