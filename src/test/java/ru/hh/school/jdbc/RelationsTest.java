@@ -1,5 +1,6 @@
 package ru.hh.school.jdbc;
 
+import com.opentable.db.postgres.embedded.EmbeddedPostgres;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.Metadata;
 import org.hibernate.boot.MetadataSources;
@@ -9,6 +10,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.postgresql.ds.PGSimpleDataSource;
 import javax.sql.DataSource;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -28,16 +30,30 @@ public class RelationsTest {
 
   @BeforeClass
   public static void setUpTestSuit() {
+    EmbeddedPostgres embeddedPostgres = null;
+
+    try {
+      embeddedPostgres = EmbeddedPostgres.builder()
+              .setPort(5433)
+              .start();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
     dataSource = createDataSource();
     sessionFactory = createSessionFactory();
     transactionHelper = new TransactionHelper(sessionFactory);
+
+      if (embeddedPostgres != null) {
+          TestHelper.executeScript(embeddedPostgres.getPostgresDatabase(), "prepare_data.sql");
+      }
   }
 
   private static DataSource createDataSource() {
     PGSimpleDataSource ds = new PGSimpleDataSource();
-    ds.setUser("hh");
-    ds.setPassword("123");
-    ds.setUrl("jdbc:postgresql://localhost:5432/hh");
+    ds.setUser("postgres");
+    ds.setPassword("postgres");
+    ds.setUrl("jdbc:postgresql://localhost:5433/postgres");
     return ds;
   }
 

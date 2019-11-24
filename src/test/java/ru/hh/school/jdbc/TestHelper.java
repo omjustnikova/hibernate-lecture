@@ -1,13 +1,18 @@
 package ru.hh.school.jdbc;
 
 import javax.sql.DataSource;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class TestHelper {
 
@@ -16,6 +21,8 @@ public class TestHelper {
 
   private final static String USER_INSERT_QUERY = "insert into hhuser(first_name, last_name) values (?, ?)";
   private final static String RESUME_INSERT_QUERY = "insert into resume(description, user_id) values (?, ?)";
+
+  private static final Path SCRIPTS_DIR = Path.of("src","main", "resources", "scripts");
 
   public static List<Integer> insertTestData(DataSource dataSource) {
     List<Integer> result = new ArrayList<>();
@@ -82,5 +89,32 @@ public class TestHelper {
       throw new RuntimeException("can't clear resume table", e);
     }
   }
+
+  /**
+   * Файл должен лежать в resources/scripts
+   */
+  public static void executeScript(DataSource dataSource, String scriptFileName) {
+    splitToQueries(SCRIPTS_DIR.resolve(scriptFileName))
+            .forEach((query) -> execute(dataSource, query));
+  }
+
+  public static void execute(DataSource dataSource, String query) {
+    try (Connection connection = dataSource.getConnection();
+         Statement statement = connection.createStatement()) {
+      statement.executeUpdate(query);
+    } catch (SQLException e) {
+      throw new RuntimeException("Can't execute query " + query, e);
+    }
+  }
+
+  private static Stream<String> splitToQueries(Path path) {
+    try {
+      return Arrays.stream(Files.readString(path).split(";"));
+    } catch (IOException e) {
+      throw new RuntimeException("Can't read file " + path, e);
+    }
+  }
+
+
 
 }
