@@ -52,7 +52,7 @@ public class ResumeServiceTest {
                 .build();
 
         Metadata metadata = new MetadataSources(serviceRegistry)
-                // ToDo add entity class
+                .addAnnotatedClass(Resume.class)
                 .buildMetadata();
 
         return metadata.buildSessionFactory();
