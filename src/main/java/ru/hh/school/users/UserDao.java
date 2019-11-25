@@ -30,26 +30,7 @@ public class UserDao {
       throw new IllegalArgumentException("User " + user + " already exists");
     }
 
-    try (Connection connection = dataSource.getConnection();
-         PreparedStatement preparedStatement = connection.prepareStatement(
-             "insert into hhuser (first_name, last_name) values (?, ?)",
-             Statement.RETURN_GENERATED_KEYS)
-    ) {
-        preparedStatement.setString(1, user.getFirstName());
-        preparedStatement.setString(2, user.getLastName());
-        preparedStatement.executeUpdate();
-
-        try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
-          if (generatedKeys.next()) {
-            user.setId(generatedKeys.getInt("user_id"));
-          }
-        }
-
-
-    } catch (SQLException e) {
-      throw new RuntimeException(e);
-    }
-
+    // TODO Implement om prepared statement
 
   }
 
