@@ -8,14 +8,12 @@ import java.util.function.Supplier;
 
 public class UserService {
 
-  private final SessionFactory sessionFactory;
   private final UserDao userDao;
   private final TransactionHelper th;
 
   public UserService(
           SessionFactory sessionFactory,
           UserDao userDao) {
-    this.sessionFactory = sessionFactory;
     this.userDao = userDao;
     this.th = new TransactionHelper(sessionFactory);
   }
