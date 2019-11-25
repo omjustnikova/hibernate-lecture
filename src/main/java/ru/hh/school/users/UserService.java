@@ -1,10 +1,8 @@
 package ru.hh.school.users;
 
 import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Supplier;
 
 public class UserService {
 
