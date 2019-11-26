@@ -23,8 +23,6 @@ public class UserDao {
   }
 
 
-  // region already implemented methods
-
   public void saveNew(User user) {
     if (user.getId() != null) {
       throw new IllegalArgumentException("User " + user + " already exists");
@@ -100,7 +98,7 @@ public class UserDao {
     try(Connection connection = dataSource.getConnection()) {
 
       try (PreparedStatement statement = connection.prepareStatement(
-        "UPDATE hhuser SET first_name = ?, last_name = ? WHERE user_id = ?")) {
+        "")) {
 
         //TODO:
         //реализовать установку параметров и вызов запроса
@@ -111,6 +109,5 @@ public class UserDao {
     }
   }
 
-  //endregion
 
 }
