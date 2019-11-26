@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
@@ -18,8 +19,24 @@ public class UserDao {
   }
 
   public Set<User> getAll() {
-    // ToDo: implement
-    return null;
+    Set<User> result = new HashSet<>();
+    try(
+        Connection connection = dataSource.getConnection();
+        Statement statement = connection.createStatement();
+        ResultSet resultSet = statement.executeQuery("select * from hhuser");
+    ) {
+      while (resultSet.next())
+      {
+        result.add(User.existing(
+            resultSet.getInt("user_id"),
+            resultSet.getString("first_name"),
+            resultSet.getString("last_name")
+        ));
+      }
+      return result;
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
   }
 
 

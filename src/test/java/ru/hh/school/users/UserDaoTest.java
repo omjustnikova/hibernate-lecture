@@ -19,6 +19,7 @@ import java.util.Set;
 public class UserDaoTest {
 
   private static UserDao userDao;
+  private static PGSimpleDataSource ds;
 
   @Before
   public void cleanUpDb() {
@@ -27,7 +28,14 @@ public class UserDaoTest {
 
   @Test
   public void getAllUsersShouldReturnEmptySet() {
-    assertEquals(Collections.emptySet(), userDao.getAll());
+    TestHelper.executeScript(ds, "insert_some_users.sql");
+    Set<User> users = userDao.getAll();
+    assertEquals(2, users.size());
+    assertTrue(
+        users
+            .stream()
+            .anyMatch(u -> u.getFirstName().equals("John"))
+    );
   }
 
   @Test
@@ -106,10 +114,10 @@ public class UserDaoTest {
           .setPort(5433)
           .start();
     } catch (IOException e) {
-      e.printStackTrace();
+      throw new RuntimeException(e);
     }
 
-    PGSimpleDataSource ds = new PGSimpleDataSource();
+    ds = new PGSimpleDataSource();
     ds.setUser("postgres");
     ds.setPassword("postgres");
     ds.setUrl("jdbc:postgresql://localhost:5433/postgres");
