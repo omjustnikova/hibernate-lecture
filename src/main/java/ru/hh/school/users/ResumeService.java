@@ -3,6 +3,7 @@ package ru.hh.school.users;
 import org.hibernate.SessionFactory;
 
 import java.util.Optional;
+import java.util.Set;
 
 public class ResumeService {
     private final ResumeDao resumeDao;
@@ -21,5 +22,9 @@ public class ResumeService {
 
     public Optional<Resume> getBy(int resumeId) {
         return th.inTransaction(() -> resumeDao.getBy(resumeId));
+    }
+
+    public Set<Resume> getActiveResumesForUserId(int userId) {
+        return th.inTransaction(() -> resumeDao.getActiveResumesForUserId(userId));
     }
 }

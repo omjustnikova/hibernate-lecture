@@ -3,7 +3,9 @@ package ru.hh.school.users;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 public class ResumeDao {
     private final SessionFactory sessionFactory;
@@ -17,8 +19,13 @@ public class ResumeDao {
     }
 
     public Optional<Resume> getBy(int id) {
-        return Optional.empty();
         // TODO Implement
+        return Optional.empty();
+    }
+
+    public Set<Resume> getActiveResumesForUserId(int userId) {
+        // TODO Implement
+        return new HashSet<>();
     }
 
     private Session session() {
