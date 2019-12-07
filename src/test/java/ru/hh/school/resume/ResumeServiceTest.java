@@ -6,6 +6,7 @@ import org.hibernate.boot.Metadata;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.service.ServiceRegistry;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import ru.hh.school.TestHelper;
@@ -21,11 +22,10 @@ import static org.junit.Assert.assertFalse;
 public class ResumeServiceTest {
 
     private static ResumeService resumeService;
+    private static EmbeddedPostgres embeddedPostgres = null;
 
     @BeforeClass
     public static void setUp() {
-        EmbeddedPostgres embeddedPostgres = null;
-
         try {
             embeddedPostgres = EmbeddedPostgres.builder()
                     .setPort(5433)
@@ -45,6 +45,16 @@ public class ResumeServiceTest {
             TestHelper.executeScript(embeddedPostgres.getPostgresDatabase(), "create_resume.sql");
         }
     }
+
+    @AfterClass
+    public static void shutdown(){
+        try {
+            embeddedPostgres.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     private static SessionFactory createSessionFactory() {
         ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
