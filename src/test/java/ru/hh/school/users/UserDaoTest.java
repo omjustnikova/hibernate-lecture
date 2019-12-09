@@ -27,7 +27,7 @@ public class UserDaoTest {
   }
 
   @Test
-  public void getAllUsersShouldReturnEmptySet() {
+  public void getAllUsersShouldReturnTwoEnyties() {
     TestHelper.executeScript(ds, "insert_some_users.sql");
     Set<User> users = userDao.getAll();
     assertEquals(2, users.size());
