@@ -38,4 +38,16 @@ public class Resume {
   public void setUser(User user) {
     this.user = user;
   }
+
+  public Integer getId() {
+    return id;
+  }
+
+  public String getDescription() {
+    return description;
+  }
+
+  public User getUser() {
+    return user;
+  }
 }

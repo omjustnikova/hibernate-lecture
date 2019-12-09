@@ -1,6 +1,7 @@
 package ru.hh.school.jdbc;
 
 import com.opentable.db.postgres.embedded.EmbeddedPostgres;
+import org.hibernate.LazyInitializationException;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.Metadata;
 import org.hibernate.boot.MetadataSources;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 public class RelationsTest {
 
@@ -73,6 +75,7 @@ public class RelationsTest {
     expectedUserIds = TestHelper.insertTestData(dataSource);
   }
 
+
   @Test
   public void fetchAssociatedEntitiesWithJdbc() {
     try (Connection connection = dataSource.getConnection()) {
@@ -86,7 +89,27 @@ public class RelationsTest {
         statement.setInt(2, expectedUserIds.get(expectedUserIds.size() - 1));
 
         try (ResultSet resultSet = statement.executeQuery()) {
-          List<User> users = toUsers(resultSet);
+
+          Map<Integer, User> userMap = new LinkedHashMap<>();
+          while (resultSet.next()) {
+            Integer userId = resultSet.getInt(1);
+            User user = userMap.get(userId);
+            if (user == null) {
+              user = new User();
+              user.setId(userId);
+              user.setFirstName(resultSet.getString(2));
+              user.setLastName(resultSet.getString(3));
+              userMap.put(userId, user);
+            }
+            Resume resume = new Resume();
+            resume.setId(resultSet.getInt(4));
+            resume.setDescription(resultSet.getString(5));
+            user.addResume(resume);
+          }
+
+          List<User> users = new ArrayList<>(userMap.values());
+
+
           assertEquals(expectedUserIds.size(), users.size());
         }
       }
@@ -95,32 +118,13 @@ public class RelationsTest {
     }
   }
 
-  private List<User> toUsers(ResultSet resultSet) throws SQLException {
-    Map<Integer, User> userMap = new LinkedHashMap<>();
-    while (resultSet.next()) {
-      Integer userId = resultSet.getInt(1);
-      User user = userMap.get(userId);
-      if (user == null) {
-        user = new User();
-        user.setId(userId);
-        user.setFirstName(resultSet.getString(2));
-        user.setLastName(resultSet.getString(3));
-        userMap.put(userId, user);
-      }
-      Resume resume = new Resume();
-      resume.setId(resultSet.getInt(4));
-      resume.setDescription(resultSet.getString(5));
-      user.addResume(resume);
-    }
-    return new ArrayList<>(userMap.values());
-  }
-
 
   @Test
   public void fetchAssociatedEntitiesWithHibernate() {
     List<User> users = transactionHelper.inTransaction(this::fetchUsersWithResumes);
 
     assertEquals(expectedUserIds.size(), users.size());
+    assertEquals("description0", users.get(0).getResumes().get(0).getDescription());
   }
 
   private List<User> fetchUsersWithResumes() {
@@ -132,6 +136,62 @@ public class RelationsTest {
       .setParameter("lo", expectedUserIds.get(0))
       .setParameter("hi", expectedUserIds.get(expectedUserIds.size() - 1))
       .list();
+  }
+
+
+  @Test(expected = LazyInitializationException.class)
+  public void fetchAssociatedEntitiesWithHibernateLazy() {
+    List<User> users = transactionHelper.inTransaction(this::fetchUsersWithResumesLazy);
+
+    assertEquals(expectedUserIds.size(), users.size());
+    assertEquals("description0",
+        users
+            .get(0)
+            .getResumes()
+            .get(0)
+            .getDescription());
+  }
+
+  private List<User> fetchUsersWithResumesLazy() {
+    return sessionFactory.getCurrentSession().createQuery(
+        "select distinct u " +
+            "from User u " +
+            "where u.id between :lo and :hi", User.class)
+        .setParameter("lo", expectedUserIds.get(0))
+        .setParameter("hi", expectedUserIds.get(expectedUserIds.size() - 1))
+        .list();
+  }
+
+
+  @Test
+  public void getDescriptionFromLazyFieldInTransaction() {
+    String description = transactionHelper.inTransaction(this::getDescriptionFromLazyField);
+
+    assertEquals("description0", description);
+  }
+
+  private String getDescriptionFromLazyField() {
+    List<User> users = fetchUsersWithResumesLazy();
+    return users.get(0).getResumes().get(0).getDescription();
+  }
+
+
+  @Test
+  public void fetchAssociatedEntitiesWithHibernateLazyButThenMerge() {
+    List<User> users = transactionHelper.inTransaction(this::fetchUsersWithResumesLazy);
+
+    String description = transactionHelper.inTransaction(()->getFirstResumeDescriptionFromLazyInitUser(users.get(0)));
+    assertEquals("description0", description);
+  }
+
+  private String getFirstResumeDescriptionFromLazyInitUser(User user) {
+    sessionFactory
+        .getCurrentSession()
+        .merge(user);
+    return user
+        .getResumes()
+        .get(0)
+        .getDescription();
   }
 
 
