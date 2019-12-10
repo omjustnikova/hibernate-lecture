@@ -67,7 +67,7 @@ public class UserServiceTest {
                 .build();
 
         Metadata metadata = new MetadataSources(serviceRegistry)
-                .addAnnotatedClass(User.class)
+                // add class
                 .buildMetadata();
 
         return metadata.buildSessionFactory();
