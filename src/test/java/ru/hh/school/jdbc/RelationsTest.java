@@ -119,6 +119,7 @@ public class RelationsTest {
   }
 
 
+  // сразу фетчим связанную таблицу
   @Test
   public void fetchAssociatedEntitiesWithHibernate() {
     List<User> users = transactionHelper.inTransaction(this::fetchUsersWithResumes);
@@ -138,7 +139,8 @@ public class RelationsTest {
       .list();
   }
 
-
+  // забыли зафетчить, дёргаем поля у detached объекта,
+  // соответственно получаем LazyInitializationException
   @Test(expected = LazyInitializationException.class)
   public void fetchAssociatedEntitiesWithHibernateLazy() {
     List<User> users = transactionHelper.inTransaction(this::fetchUsersWithResumesLazy);
@@ -162,7 +164,7 @@ public class RelationsTest {
         .list();
   }
 
-
+  // забыли зафетчить, одднако дёргаем связанный объект в той же транзакции
   @Test
   public void getDescriptionFromLazyFieldInTransaction() {
     String description = transactionHelper.inTransaction(this::getDescriptionFromLazyField);
@@ -175,7 +177,7 @@ public class RelationsTest {
     return users.get(0).getResumes().get(0).getDescription();
   }
 
-
+  // забыли зафетчить. вернули объект в persistent и получили связанный объект
   @Test
   public void fetchAssociatedEntitiesWithHibernateLazyButThenMerge() {
     List<User> users = transactionHelper.inTransaction(this::fetchUsersWithResumesLazy);
