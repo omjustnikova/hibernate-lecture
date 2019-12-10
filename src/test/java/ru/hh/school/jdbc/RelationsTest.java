@@ -185,9 +185,9 @@ public class RelationsTest {
   }
 
   private String getFirstResumeDescriptionFromLazyInitUser(User user) {
-    sessionFactory
+    user = (User)sessionFactory
         .getCurrentSession()
-        .update(user);
+        .merge(user);
     return user
         .getResumes()
         .get(0)
