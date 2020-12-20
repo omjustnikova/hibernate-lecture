@@ -19,17 +19,15 @@ public class UserDao {
   }
 
   public Set<User> getAll() {
+    // TODO Implement
     return null;
   }
-
 
   public void saveNew(User user) {
     if (user.getId() != null) {
       throw new IllegalArgumentException("User " + user + " already exists");
     }
-
     // TODO Implement om prepared statement
-
   }
 
   public void deleteAll() {
