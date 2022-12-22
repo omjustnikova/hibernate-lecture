@@ -42,10 +42,12 @@ public class UserService {
 
   public void changeFullName(int userId, String firstName, String lastName) {
     th.inTransaction(() -> {
-      userDao.getBy(userId)
-        .stream()
-        .peek(user -> user.setFirstName(firstName))
-        .forEach(user -> user.setLastName(lastName));
+      final User user = userDao.getBy(userId).orElse(null);
+      if (user == null){
+        return;
+      }
+      user.setFirstName(firstName);
+      user.setLastName(lastName);
       // хибер отслеживает изменения сущностей и выполняет sql update перед коммитом транзакции
     });
   }
