@@ -20,7 +20,23 @@ public class UserDao {
 
   public Set<User> getAll() {
     // TODO Implement
-    return null;
+    Set<User> result = new HashSet<>();
+    try (
+        Connection connection = dataSource.getConnection();
+        Statement statement = connection.createStatement();
+        ResultSet resultSet = statement.executeQuery("select * from hhuser");
+    ) {
+      while (resultSet.next()) {
+        result.add(User.existing(
+            resultSet.getInt("user_id"),
+            resultSet.getString("first_name"),
+            resultSet.getString("last_name")
+        ));
+      }
+    } catch (SQLException e) {
+      throw new RuntimeException("Fail getting all users");
+    }
+    return result;
   }
 
   public void saveNew(User user) {
@@ -28,6 +44,25 @@ public class UserDao {
       throw new IllegalArgumentException("User " + user + " already exists");
     }
     // TODO Implement om prepared statement
+    try (
+        Connection connection = dataSource.getConnection();
+        PreparedStatement statement = connection.prepareStatement(
+            "insert into hhuser (first_name, last_name) " +
+            "values (?, ?)", PreparedStatement.RETURN_GENERATED_KEYS
+        );
+    ) {
+      statement.setString(1, user.getFirstName());
+      statement.setString(2, user.getLastName());
+      statement.executeUpdate();
+
+      ResultSet generatedKeys = statement.getGeneratedKeys();
+      while (generatedKeys.next()) {
+        user.setId(generatedKeys.getInt("user_id"));
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+      throw new RuntimeException("Fail saving a new user");
+    }
   }
 
   public void deleteAll() {
@@ -79,8 +114,8 @@ public class UserDao {
         statement.setInt(1, userId);
 
         // TODO: нужное раскомментить
-//        statement.executeUpdate();
-//        statement.executeQuery();
+        statement.executeUpdate();
+//      statement.executeQuery();
       }
 
     } catch (SQLException e) {
@@ -96,10 +131,15 @@ public class UserDao {
     try(Connection connection = dataSource.getConnection()) {
 
       try (PreparedStatement statement = connection.prepareStatement(
-        "")) {
+        "update hhuser set first_name=?, last_name=? where user_id=?")) {
 
         //TODO:
         //реализовать установку параметров и вызов запроса
+        statement.setString(1, user.getFirstName());
+        statement.setString(2, user.getLastName());
+        statement.setInt(3,  user.getId());
+
+        statement.executeUpdate();
       }
 
     } catch (SQLException e) {

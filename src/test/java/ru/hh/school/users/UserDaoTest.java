@@ -12,7 +12,6 @@ import org.junit.Test;
 import org.postgresql.ds.PGSimpleDataSource;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 
@@ -87,6 +86,14 @@ public class UserDaoTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void updateShouldThrowExceptionForNewUsers() {
+    User user = User.newUser("John", "Lennon");
+    userDao.update(user);
+
+    fail();
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void updateShouldThrowExceptionForUsersMissingInDB() {
     User user = User.newUser("John", "Lennon");
     userDao.update(user);
 
